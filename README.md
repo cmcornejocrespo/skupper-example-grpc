@@ -4,6 +4,10 @@ This tutorial demonstrates how to deploy the [Online Boutique](https://github.co
 
 In this tutorial, you will create a Virtual Application Network that enables communications across the public and private clusters. You will then deploy a subset of the application's grpc based microservices to each cluster. You will then access the `Online Boutique` web interface to browse items, add them to the cart and purchase them.
 
+<center>
+<img src="images/overall.png" width="728"/>
+</center>
+
 Top complete this tutorial, do the following:
 
 * [Prerequisites](#prerequisites)
@@ -22,7 +26,7 @@ Top complete this tutorial, do the following:
 
 The basis for this demonstration is to depict the deployment of member microservices for an application across both private and public clusters and for the ability of these microsservices to communicate across a Virtual Application Network. As an example, the cluster deployment might be comprised of:
 
-* A private cloud cluster running on your local machine
+* A private cloud cluster running on your local machine or any cloud provider
 * Two public cloud clusters running in public cloud providers
 
 While the detailed steps are not included here, this demonstration can alternatively be performed with three separate namespaces on a single cluster.
@@ -67,7 +71,7 @@ On each cluster, using the `skupper` tool, define the Virtual Application Networ
 3. In the terminal for the private cluster, deploy the **private1** application router and define its connections to the **public1** and **public2** cluster
 
    ```bash
-   skupper init --site-name private1
+   skupper init --enable-console --enable-flow-collector --site-name private1
    skupper link create public1-token.yaml
    skupper link create public2-token.yaml
    ```
@@ -93,19 +97,19 @@ labelled *a, b, and c*. These files (arbitrarily) define a subset of the applica
 1. In the terminal for the **private1** cluster, deploy the following:
 
    ```bash
-   kubectl apply -f skupper-example-grpc/deployment-ms-a.yaml
+   oc apply -f skupper-example-grpc/deployment-ms-a.yaml
    ```
 
 2. In the terminal for the **public1** cluster, deploy the following:
 
    ```bash
-   kubectl apply -f skupper-example-grpc/deployment-ms-b.yaml
+   oc apply -f skupper-example-grpc/deployment-ms-b.yaml
    ```
 
 3. In the terminal for the **public2** cluster, deploy the following:
 
    ```bash
-   kubectl apply -f skupper-example-grpc/deployment-ms-c.yaml
+   oc apply -f skupper-example-grpc/deployment-ms-c.yaml
    ```
 
 ## Step 4: Expose the microservices to the Virtual Application Network
@@ -144,7 +148,7 @@ The web frontend for the `Online Boutique` application can be accessed via the *
 terminal for the **private1** cluster, start a firefox browser and access the shop UI.
 
    ```bash
-   /usr/bin/firefox --new-window  "http://$(kubectl get service frontend-external -o=jsonpath='{.spec.clusterIP}')/"
+   /usr/bin/firefox --new-window  "http://$(oc get route frontend-external -o=jsonpath='{.spec.host}')/"
    ```
 
 Open a browser and use the url provided above to access the `Online Boutique`.
@@ -156,19 +160,80 @@ The `Online Boutique` application has a load generator that creates realistic us
 1. In the terminal for the **private1** cluster, deploy the load generator:
 
    ```bash
-   kubectl apply -f skupper-example-grpc/deployment-loadgenerator.yaml
+   oc apply -f skupper-example-grpc/deployment-loadgenerator.yaml
    ```
 2. In the terminal for the **private1** cluster, observe the output from the load generator:
 
    ```bash
-   kubectl logs -f deploy/loadgenerator
+   oc logs -f deploy/loadgenerator
    ```
 3. In the terminal for the **private1** cluster, stop the load generator:
 
    ```bash
-   kubectl delete -f skupper-example-grpc/deployment-loadgenerator.yaml
+   oc delete -f skupper-example-grpc/deployment-loadgenerator.yaml
    ```
-   
+
+## Step 7: Review Skupper Console
+
+1. In the terminal for the **private1** cluster, retrieve the skupper console url:
+
+   ```bash
+   skupper status
+   Skupper is enabled for namespace "public2" in interior mode. It is connected to 2 other sites. It has 10 exposed services.
+   The site console url is:  https://skupper-public2.apps.tenant-02-gcp.lqwmb.gcp.redhatworkshops.io
+   The credentials for internal console-auth mode are held in secret: 'skupper-console-users'
+   ```
+2. In the terminal for the **private1** cluster, retrieve the skupper console password:
+
+   ```bash
+   oc get secret skupper-console-users --template={{.data.admin}} | base64 --decode
+   <password>
+   ```
+
+3. Check Components tab:
+
+<center>
+<img src="images/components.png" width="640"/>
+</center>
+
+4. Check Processes tab:
+
+<center>
+<img src="images/processes.png" width="640"/>
+</center>
+
+5. Check Addresses tab:
+
+<center>
+<img src="images/addresses.png" width="640"/>
+</center>
+
+6. Check Addresses tab:
+
+<center>
+<img src="images/addresses.png" width="640"/>
+</center>
+
+7. Check Addresses tab (tcp):
+
+<center>
+<img src="images/tcp-connections.png" width="640"/>
+</center>
+
+8. Check Addresses tab (http2):
+
+<center>
+<img src="images/http-connections.png" width="640"/>
+</center>
+
+<center>
+<img src="images/http-connections-2.png" width="640"/>
+</center>
+
+<center>
+<img src="images/http-connections-3.png" width="640"/>
+</center>
+
 ## Cleaning Up
 
 Restore your cluster environment by returning the resources created in the demonstration. On each cluster, delete the demo resources and the skupper network:
@@ -177,7 +242,7 @@ Restore your cluster environment by returning the resources created in the demon
 
    ```bash
    skupper-example-grpc/unexpose-deployments-a.sh
-   kubectl delete -f skupper-example-grpc/deployment-ms-a.yaml
+   oc delete -f skupper-example-grpc/deployment-ms-a.yaml
    skupper delete
    ```
 
@@ -185,7 +250,7 @@ Restore your cluster environment by returning the resources created in the demon
 
    ```bash
    skupper-example-grpc/unexpose-deployments-b.sh
-   kubectl delete -f skupper-example-grpc/deployment-ms-b.yaml
+   oc delete -f skupper-example-grpc/deployment-ms-b.yaml
    skupper delete
    ```
 
@@ -193,7 +258,7 @@ Restore your cluster environment by returning the resources created in the demon
 
    ```bash
    skupper-example-grpc/unexpose-deployments-c.sh
-   kubectl delete -f skupper-example-grpc/deployment-ms-c.yaml
+   oc delete -f skupper-example-grpc/deployment-ms-c.yaml
    skupper delete
    ```
 

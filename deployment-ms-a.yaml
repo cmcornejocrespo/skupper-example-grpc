@@ -125,18 +125,32 @@ spec:
     port: 80
     targetPort: 8080
 ---
-apiVersion: v1
-kind: Service
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: frontend-external
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: frontend
+#   ports:
+#   - name: http
+#     port: 80
+#     targetPort: 8080
+apiVersion: route.openshift.io/v1
+kind: Route
 metadata:
+  annotations:
+    openshift.io/host.generated: "true"
   name: frontend-external
 spec:
-  type: LoadBalancer
-  selector:
-    app: frontend
-  ports:
-  - name: http
-    port: 80
-    targetPort: 8080
+  port:
+    targetPort: http
+  to:
+    kind: Service
+    name: frontend
+    weight: 100
+  wildcardPolicy: None
 ---
 apiVersion: apps/v1
 kind: Deployment
