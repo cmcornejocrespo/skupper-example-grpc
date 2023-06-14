@@ -12,7 +12,7 @@ sudo dnf install k6
 k6 supports three execution modes to run a k6 test: local, distributed, and cloud. We will focus on **local mode**
 
 ```bash
-#Make sure you change the forn
+# Make sure you change the FRONT
 k6 run -e FRONT=http://frontend-external-west.apps.ocp-skupper-acm.r7b7x.azure.redhatworkshops.io script.js
 
 ```

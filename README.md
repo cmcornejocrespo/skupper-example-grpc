@@ -193,48 +193,34 @@ The `Online Boutique` application has a load generator that creates realistic us
    Skupper is enabled for namespace "west" in interior mode. It is connected to 2 other sites. It has 10 exposed services.
    The site console url is:  https://skupper-west.apps.<ocp-basedomain>
    ```
-3. Check Components tab:
+3. Check Site tab:
 
 <center>
-<img src="images/components.png" width="640"/>
+<img src="images/site.png" width="640"/>
 </center>
 
-4. Check Processes tab:
+4. Check Network tab:
 
 <center>
-<img src="images/processes.png" width="640"/>
+<img src="images/network.png" width="640"/>
 </center>
 
-5. Check Addresses tab:
+5. Check Services tab:
 
 <center>
-<img src="images/addresses.png" width="640"/>
+<img src="images/service.png" width="640"/>
 </center>
 
-6. Check Addresses tab:
+6. Check Deployments tab:
 
 <center>
-<img src="images/addresses.png" width="640"/>
+<img src="images/deployments.png" width="640"/>
 </center>
 
 7. Check Addresses tab (tcp):
 
 <center>
 <img src="images/tcp-connections.png" width="640"/>
-</center>
-
-8. Check Addresses tab (http2):
-
-<center>
-<img src="images/http-connections.png" width="640"/>
-</center>
-
-<center>
-<img src="images/http-connections-2.png" width="640"/>
-</center>
-
-<center>
-<img src="images/http-connections-3.png" width="640"/>
 </center>
 
 ## Cleaning Up
