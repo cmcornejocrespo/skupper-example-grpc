@@ -38,7 +38,7 @@ While the detailed steps are not included here, this demonstration can alternati
    ```bash
    mkdir boutique-demo
    cd boutique-demo
-   git clone https://github.com/skupperproject/skupper-example-grpc.git
+   git clone https://github.com/cmcornejo/skupper-example-grpc.git
    ```
 
 3. Prepare the target clusters.
@@ -47,33 +47,32 @@ While the detailed steps are not included here, this demonstration can alternati
    2. In each cluster, create a namespace to use for the demo.
    3. In each cluster, set the kubectl config context to use the demo namespace [(see kubectl cheat sheet for more information)](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
    ```bash
-   kubectl config set-context --current --namespace <namespace>
+   oc config set-context --current --namespace <namespace>
    ```
 
 ## Step 2: Deploy the Virtual Application Network
 
-On each cluster, using the `skupper` tool, define the Virtual Application Network and the connectivity for the peer clusters.
+On each cluster, using the `skupper` tool, define the Virtual Application Network (VAN) and the connectivity for the peer clusters.
 
-1. In the terminal for the first public cluster, deploy the **public1** application router. Create a connection token for connections from the **public2** cluster and the **private1** cluster:
+1. In the terminal for the east cluster, deploy the **east** application router. Create a connection token for connections from the **west** cluster:
 
    ```bash
-   skupper init --site-name public1
-   skupper token create public1-token.yaml --uses 2
+   skupper init --site-name east --enable-console=false
+   skupper token create east-token.yaml
    ```
-2. In the terminal for the second public cluster, deploy the **public2** application router, create a connection token for connections from the **private1** cluser and connect to the **public1** cluster:
+2. In the terminal for the east-2 cluster, deploy the **east-2** application router, create a connection token for connections from the **west** cluster:
 
    ```bash
-   skupper init --site-name public2
-   skupper token create public2-token.yaml
-   skupper link create public1-token.yaml
+   skupper init --site-name east-2 --enable-console=false
+   skupper token create east-2-token.yaml
    ```
 
-3. In the terminal for the private cluster, deploy the **private1** application router and define its connections to the **public1** and **public2** cluster
+3. In the terminal for the west cluster, deploy the **west** application router and define its connections to the **east** and **east-2** clusters.
 
    ```bash
-   skupper init --enable-console --enable-flow-collector --site-name private1
-   skupper link create public1-token.yaml
-   skupper link create public2-token.yaml
+   skupper init --site-name west --console-auth=openshift
+   skupper link create east-token.yaml
+   skupper link create east-2-token.yaml
    ```
 
 4. In each of the cluster terminals, verify connectivity has been established
@@ -82,31 +81,43 @@ On each cluster, using the `skupper` tool, define the Virtual Application Networ
    skupper link status
    ```
 
+NOTE:
+
+There are ONLY two links between sites:
+* east->west
+* east-2->west
+
+**There isn’t link between east and east-2**
+
+<center>
+<img src="images/step-02.png" width="728"/>
+</center>
+
 ## Step 3: Deploy the application microservices
 
 After creating the Virtual Application Network, deploy the grpc based microservices for the `Online Boutique` application. There are three `deployment .yaml` files
 labelled *a, b, and c*. These files (arbitrarily) define a subset of the application microservices to deploy to a cluster.
 
-| Deployment           | Microservices
-| -------------------- | ---------------------------------------- |
-| deployment-ms-a.yaml | frontend, productcatalog, recommendation |
-| deployment-ms-b.yaml | ad, cart, checkout, currency, redis-cart |
-| deployment-ms-c.yaml | email, payment, shipping                 |
+| Deployment           | Microservices                            | Site     |
+| -------------------- | ---------------------------------------- | -------- |
+| deployment-ms-a.yaml | frontend, productcatalog, recommendation | west     |
+| deployment-ms-b.yaml | ad, cart, checkout, currency, redis-cart | east     |
+| deployment-ms-c.yaml | email, payment, shipping                 | east-2   |
 
 
-1. In the terminal for the **private1** cluster, deploy the following:
+1. In the terminal for the **west** cluster, deploy the following:
 
    ```bash
    oc apply -f skupper-example-grpc/deployment-ms-a.yaml
    ```
 
-2. In the terminal for the **public1** cluster, deploy the following:
+2. In the terminal for the **east** cluster, deploy the following:
 
    ```bash
    oc apply -f skupper-example-grpc/deployment-ms-b.yaml
    ```
 
-3. In the terminal for the **public2** cluster, deploy the following:
+3. In the terminal for the **east-2** cluster, deploy the following:
 
    ```bash
    oc apply -f skupper-example-grpc/deployment-ms-c.yaml
@@ -117,26 +128,26 @@ labelled *a, b, and c*. These files (arbitrarily) define a subset of the applica
 There are three script files labelled *-a, -b, and -c*. These files expose the services created above to join the Virtual Application Network. Note that the frontend service is not assigned to the Virtual Application Network as it is setup for external web access.
 
 
-| File                    | Deployments
-| ----------------------- | ---------------------------------------- |
-| expose-deployments-a.sh | productcatalog, recommendation           |
-| expose-deployments-b.sh | ad, cart, checkout, currency, redis-cart |
-| expose-deployments-c.sh | email, payment, shipping                 |
+| File                    | Deployments                              | Site     |
+| ----------------------- | ---------------------------------------- | ---------
+| expose-deployments-a.sh | productcatalog, recommendation           | west     |
+| expose-deployments-b.sh | ad, cart, checkout, currency, redis-cart | east     |
+| expose-deployments-c.sh | email, payment, shipping                 | east-2   |
 
 
-1. In the terminal for the **private1** cluster, execute the following annotation script:
+1. In the terminal for the **west** cluster, execute the following annotation script:
 
    ```bash
    skupper-example-grpc/expose-deployments-a.sh
    ```
 
-2. In the terminal for the **public1** cluster, execute the following annotation script:
+2. In the terminal for the **east** cluster, execute the following annotation script:
 
    ```bash
    skupper-example-grpc/expose-deployments-b.sh
    ```
 
-3. In the terminal for the **public2** cluster, execute the following annotation script:
+3. In the terminal for the **east-2** cluster, execute the following annotation script:
 
    ```bash
    skupper-example-grpc/expose-deployments-c.sh
@@ -145,7 +156,7 @@ There are three script files labelled *-a, -b, and -c*. These files expose the s
 ## Step 5: Access The Boutique Shop Application
 
 The web frontend for the `Online Boutique` application can be accessed via the *frontend-external* service. In the
-terminal for the **private1** cluster, start a firefox browser and access the shop UI.
+terminal for the **west** cluster, start a firefox browser and access the shop UI.
 
    ```bash
    /usr/bin/firefox --new-window  "http://$(oc get route frontend-external -o=jsonpath='{.spec.host}')/"
@@ -157,17 +168,17 @@ Open a browser and use the url provided above to access the `Online Boutique`.
 
 The `Online Boutique` application has a load generator that creates realistic usage patterns on the website.
 
-1. In the terminal for the **private1** cluster, deploy the load generator:
+1. In the terminal for the **west** cluster, deploy the load generator:
 
    ```bash
    oc apply -f skupper-example-grpc/deployment-loadgenerator.yaml
    ```
-2. In the terminal for the **private1** cluster, observe the output from the load generator:
+2. In the terminal for the **west** cluster, observe the output from the load generator:
 
    ```bash
    oc logs -f deploy/loadgenerator
    ```
-3. In the terminal for the **private1** cluster, stop the load generator:
+3. In the terminal for the **west** cluster, stop the load generator:
 
    ```bash
    oc delete -f skupper-example-grpc/deployment-loadgenerator.yaml
@@ -175,21 +186,13 @@ The `Online Boutique` application has a load generator that creates realistic us
 
 ## Step 7: Review Skupper Console
 
-1. In the terminal for the **private1** cluster, retrieve the skupper console url:
+1. In the terminal for the **west** cluster, retrieve the skupper console url:
 
    ```bash
    skupper status
-   Skupper is enabled for namespace "public2" in interior mode. It is connected to 2 other sites. It has 10 exposed services.
-   The site console url is:  https://skupper-public2.apps.tenant-02-gcp.lqwmb.gcp.redhatworkshops.io
-   The credentials for internal console-auth mode are held in secret: 'skupper-console-users'
+   Skupper is enabled for namespace "west" in interior mode. It is connected to 2 other sites. It has 10 exposed services.
+   The site console url is:  https://skupper-west.apps.<ocp-basedomain>
    ```
-2. In the terminal for the **private1** cluster, retrieve the skupper console password:
-
-   ```bash
-   oc get secret skupper-console-users --template={{.data.admin}} | base64 --decode
-   <password>
-   ```
-
 3. Check Components tab:
 
 <center>
@@ -238,7 +241,7 @@ The `Online Boutique` application has a load generator that creates realistic us
 
 Restore your cluster environment by returning the resources created in the demonstration. On each cluster, delete the demo resources and the skupper network:
 
-1. In the terminal for the **private1** cluster, delete the resources:
+1. In the terminal for the **west** cluster, delete the resources:
 
    ```bash
    skupper-example-grpc/unexpose-deployments-a.sh
@@ -246,7 +249,7 @@ Restore your cluster environment by returning the resources created in the demon
    skupper delete
    ```
 
-2. In the terminal for the **public1** cluster, delete the resources:
+2. In the terminal for the **east** cluster, delete the resources:
 
    ```bash
    skupper-example-grpc/unexpose-deployments-b.sh
@@ -254,7 +257,7 @@ Restore your cluster environment by returning the resources created in the demon
    skupper delete
    ```
 
-3. In the terminal for the **public2** cluster, delete the resources:
+3. In the terminal for the **east-2** cluster, delete the resources:
 
    ```bash
    skupper-example-grpc/unexpose-deployments-c.sh
