@@ -33,8 +33,8 @@ export const options = {
                 { duration: '30s', target: 50 },
                 { duration: '1m30s', target: 100 },
                 // { duration: '1m30s', target: 5000 },
-            //     { duration: '2m', target: 50000 },
-            //     { duration: '1m', target: 5000 },
+                // { duration: '2m', target: 50000 },
+                // { duration: '1m', target: 5000 },
                 // { duration: '1m', target: 500 },
                 { duration: '1m', target: 50 },
             ],
@@ -46,11 +46,11 @@ export const options = {
             // How long the test lasts
             duration: '5m30s',
             // How many iterations per timeUnit
-            rate: 30,
+            rate: 50,
             // Start `rate` iterations per second
             timeUnit: '1s',
             // Pre-allocate VUs
-            preAllocatedVUs: 50,
+            preAllocatedVUs: 100,
         },
         browseProduct: {
             executor: 'ramping-arrival-rate',
@@ -63,33 +63,33 @@ export const options = {
                 { duration: '1m', target: 50 },
             ],
             // Pre-allocate VUs
-            preAllocatedVUs: 100,
+            preAllocatedVUs: 500,
         },
         viewCart: {
             executor: 'ramping-arrival-rate',
             exec: 'viewCart',
             stages: [
-                { duration: '30s', target: 50 },
+                { duration: '30s', target: 100 },
                 // { duration: '1m30s', target: 500 },
                 // { duration: '1m30s', target: 5000 },
                 // { duration: '2m', target: 500 },
-                { duration: '1m', target: 50 },
+                { duration: '1m', target: 100 },
             ],
             // Pre-allocate VUs
-            preAllocatedVUs: 100,
+            preAllocatedVUs: 200,
         },
         addToCart: {
             executor: 'ramping-arrival-rate',
             exec: 'addToCart',
             stages: [
-                { duration: '30s', target: 50 },
+                { duration: '30s', target: 100 },
                 // { duration: '1m30s', target: 500 },
                 // { duration: '1m30s', target: 5000 },
                 // { duration: '2m', target: 500 },
-                { duration: '1m', target: 50 },
+                { duration: '1m', target: 100 },
             ],
             // Pre-allocate VUs
-            preAllocatedVUs: 100,
+            preAllocatedVUs: 200,
         },
         checkout: {
             executor: 'ramping-arrival-rate',
@@ -102,7 +102,7 @@ export const options = {
                 { duration: '1m', target: 50 },
             ],
             // Pre-allocate VUs
-            preAllocatedVUs: 300,
+            preAllocatedVUs: 400,
         },
     }
 };
