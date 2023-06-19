@@ -4,10 +4,6 @@ This tutorial demonstrates how to deploy the [Online Boutique](https://github.co
 
 In this tutorial, you will create a Virtual Application Network that enables communications across the public and private clusters. You will then deploy a subset of the application's grpc based microservices to each cluster. You will then access the `Online Boutique` web interface to browse items, add them to the cart and purchase them.
 
-<center>
-<img src="images/overall.png" width="728"/>
-</center>
-
 Top complete this tutorial, do the following:
 
 * [Prerequisites](#prerequisites)
@@ -217,11 +213,11 @@ The `Online Boutique` application has a load generator that creates realistic us
 <img src="images/deployments.png" width="640"/>
 </center>
 
-7. Check Addresses tab (tcp):
+<!-- 7. Check Addresses tab (tcp):
 
 <center>
 <img src="images/tcp-connections.png" width="640"/>
-</center>
+</center> -->
 
 ## Cleaning Up
 
