@@ -1,5 +1,5 @@
 import http from 'k6/http';
-import { check, sleep } from 'k6';
+import { sleep } from 'k6';
 import { randomItem } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 import { describe, expect } from 'https://jslib.k6.io/k6chaijs/4.3.4.3/index.js';
 
@@ -28,12 +28,12 @@ export const options = {
         index: {
             executor: 'ramping-vus',
             exec: 'index',
-            startVUs: 20,
+            startVUs: 200,
             stages: [
                 { duration: '30s', target: 50 },
                 { duration: '1m30s', target: 100 },
-                // { duration: '1m30s', target: 5000 },
-                // { duration: '2m', target: 50000 },
+                // { duration: '1m30s', target: 500 },
+                // { duration: '2m', target: 1000 },
                 // { duration: '1m', target: 5000 },
                 // { duration: '1m', target: 500 },
                 { duration: '1m', target: 50 },
@@ -44,13 +44,13 @@ export const options = {
             executor: 'constant-arrival-rate',
             exec: 'setCurrency',
             // How long the test lasts
-            duration: '30s',
+            duration: '2m30s',
             // How many iterations per timeUnit
-            rate: 10,
+            rate: 50,
             // Start `rate` iterations per second
             timeUnit: '1s',
             // Pre-allocate VUs
-            preAllocatedVUs: 50,
+            preAllocatedVUs: 2000,
         },
         browseProduct: {
             executor: 'ramping-arrival-rate',
@@ -58,12 +58,12 @@ export const options = {
             stages: [
                 { duration: '30s', target: 50 },
                 // { duration: '1m30s', target: 500 },
-                // { duration: '1m30s', target: 5000 },
-                // { duration: '2m', target: 500 },
+                // { duration: '1m30s', target: 1000 },
+                { duration: '2m', target: 500 },
                 { duration: '1m', target: 50 },
             ],
             // Pre-allocate VUs
-            preAllocatedVUs: 250,
+            preAllocatedVUs: 2500,
         },
         viewCart: {
             executor: 'ramping-arrival-rate',
@@ -71,38 +71,38 @@ export const options = {
             stages: [
                 { duration: '30s', target: 50 },
                 // { duration: '1m30s', target: 500 },
-                // { duration: '1m30s', target: 5000 },
-                // { duration: '2m', target: 500 },
+                // { duration: '1m30s', target: 1000 },
+                { duration: '2m', target: 500 },
                 { duration: '1m', target: 50 },
             ],
             // Pre-allocate VUs
-            preAllocatedVUs: 250,
+            preAllocatedVUs: 3000,
         },
         addToCart: {
             executor: 'ramping-arrival-rate',
             exec: 'addToCart',
             stages: [
-                { duration: '30s', target: 10 },
+                { duration: '30s', target: 50 },
                 // { duration: '1m30s', target: 500 },
-                // { duration: '1m30s', target: 5000 },
+                // { duration: '1m30s', target: 1000 },
                 // { duration: '2m', target: 500 },
-                { duration: '1m', target: 10 },
+                { duration: '1m', target: 50 },
             ],
             // Pre-allocate VUs
-            preAllocatedVUs: 50,
+            preAllocatedVUs: 2500,
         },
         checkout: {
             executor: 'ramping-arrival-rate',
             exec: 'checkout',
             stages: [
                 { duration: '1m30s', target: 50 },
-                // { duration: '30s', target: 100 },
-                // { duration: '1m30s', target: 200 },
-                // { duration: '2m', target: 100 },
+                // { duration: '30s', target: 500 },
+                // { duration: '1m30s', target: 1000 },
+                // { duration: '2m', target: 500 },
                 { duration: '1m', target: 50 },
             ],
             // Pre-allocate VUs
-            preAllocatedVUs: 250,
+            preAllocatedVUs: 1000,
         },
     }
 };
@@ -111,83 +111,93 @@ export function index() {
     // BDD style
     describe('Loads the boutique frontend', () => {
         // when
-        const response = http.get(endpoint);
-
+        const outcome = http.get(endpoint);
         //then
-        expect(response.status, 'response status').to.equal(200);
+        expect(outcome.status, 'response status').to.equal(200);
         sleep(1 + Math.random()); // sleep between 1s and 2s
     });
 }
 
 export function browseProduct() {
-
     // BDD style
     describe('Browse random products', () => {
-        //given
+        ////test fixtures
         const product = randomItem(products);
         // when
-        const response = http.get(endpoint + '/product/' + product);
+        const outcome = http.get(endpoint + '/product/' + product);
         //then
-        expect(response.status, 'response status').to.equal(200);
+        expect(outcome.status, 'response status').to.equal(200);
         sleep(1 + Math.random()); // sleep between 1s and 2s
     });
 }
 
 export function setCurrency() {
-
-    const payload = {
-        currency_code: randomItem(currencies),
-    };
-
-    const res = http.post(endpoint + '/setCurrency', payload, {});
-
-    check(res, { 'status was 200': (r) => r.status == 200 });
-    sleep(1 + Math.random()); // sleep between 1s and 2s
+    // BDD style
+    describe('Simulates user changing the currency', () => {
+        ////test fixtures
+        const payload = {
+            currency_code: randomItem(currencies),
+        };
+        // when
+        const outcome = http.post(endpoint + '/setCurrency', payload, {});
+        // then
+        expect(outcome.status, 'response status').to.equal(200);
+        sleep(1 + Math.random()); // sleep between 1s and 2s
+    });
 }
 
 export function viewCart() {
-
-    const res = http.get(endpoint + '/cart');
-
-    check(res, { 'status was 200': (r) => r.status == 200 });
-
-    sleep(1 + Math.random()); // sleep between 1s and 2s
+    // BDD style
+    describe('Simulates user viewing the shopping cart', () => {
+        //when
+        const outcome = http.get(endpoint + '/cart');
+        //then
+        expect(outcome.status, 'response status').to.equal(200);
+        sleep(1 + Math.random()); // sleep between 1s and 2s
+    });
 }
 
 export function addToCart() {
-    const product = randomItem(products);
-    http.get(endpoint + '/product/' + product);
-
-    const payload = {
-        product_id: product,
-        quantity: randomItem([1,2,3,4,5,10]),
-      };
-
-    const resAddCart = http.post(endpoint + '/cart', payload, {});
-
-    check(resAddCart, { 'status was 200': (r) => r.status == 200 });
-    sleep(1 + Math.random()); // sleep between 1s and 2s
+    // BDD style
+    describe('Simulates user viewing products and adding it to the shopping cart', () => {
+        //given
+        const product = randomItem(products);
+        http.get(endpoint + '/product/' + product);
+        //test fixtures
+        const payload = {
+            product_id: product,
+            quantity: randomItem([1,2,3,4,5,10]),
+        };
+        //when
+        const outcome = http.post(endpoint + '/cart', payload, {});
+        //then
+        expect(outcome.status, 'response status').to.equal(200);
+        sleep(1 + Math.random()); // sleep between 1s and 2s
+    });
 }
 
 export function checkout() {
-
-    addToCart();
-
-    const payload = {
-        email: 'someone@example.com',
-        street_address: '1600 Amphitheatre Parkway',
-        zip_code: '94043',
-        city: 'Mountain View',
-        state: 'CA',
-        country: 'United States',
-        credit_card_number: '4432-8015-6152-0454',
-        credit_card_expiration_month: '1',
-        credit_card_expiration_year: '2039',
-        credit_card_cvv: '672',
-      };
-
-    const res = http.post(endpoint + '/cart/checkout', payload, {});
-
-    check(res, { 'status was 200': (r) => r.status == 200 , 'protocol is HTTP/2': (r) => r.proto === 'HTTP/2.0', });
-    sleep(1 + Math.random()); // sleep between 1s and 2s
+    // BDD style
+    describe('Simulates the checkout process', () => {
+        //given
+        addToCart();
+        //test fixtures
+        const payload = {
+            email: 'someone@example.com',
+            street_address: '1600 Amphitheatre Parkway',
+            zip_code: '94043',
+            city: 'Mountain View',
+            state: 'CA',
+            country: 'United States',
+            credit_card_number: '4432-8015-6152-0454',
+            credit_card_expiration_month: '1',
+            credit_card_expiration_year: '2039',
+            credit_card_cvv: '672',
+        };
+        //when
+        const outcome = http.post(endpoint + '/cart/checkout', payload, {});
+        //then
+        expect(outcome.status, 'response status').to.equal(200);
+        sleep(1 + Math.random()); // sleep between 1s and 2s
+    });
 }
