@@ -1,0 +1,19 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: grafana
+spec:
+  channel: v4
+  installPlanApproval: {{ grafana_subscription_approval }}
+  name: grafana-operator
+  source: community-operators
+  sourceNamespace: openshift-marketplace
+  config:
+    env:
+    # HTTP proxy settings
+    - name: HTTP_PROXY
+      value: ''
+    - name: HTTPS_PROXY
+      value: ''
+    - name: NO_PROXY
+      value: ''

@@ -19,4 +19,9 @@ k6 run -e FRONT=http://frontend-external-west.apps.ocp-skupper-acm.r7b7x.azure.r
 
 NOTE: This test is built having [Scenarios/Executors](https://k6.io/docs/using-k6/scenarios/executors/) in mind. Please refer to the official documentation for further details.
 
+## Running k6 output to influxDB
+
+Alternatively, you can configure k6 to store the test results in influxDB.
+
+Refer to [Working with dashboards](../ansible/)
 

@@ -1,0 +1,14 @@
+apiVersion: integreatly.org/v1alpha1
+kind: GrafanaDataSource
+metadata:
+  name: k6influxdb
+  namespace: grafana
+spec:
+  datasources:
+    - name: k6influxdb
+      type: influxdb
+      access: proxy
+      database: k6
+      isDefault: true
+      url: 'http://influxdb-service:8086'
+  name: k6influxdb

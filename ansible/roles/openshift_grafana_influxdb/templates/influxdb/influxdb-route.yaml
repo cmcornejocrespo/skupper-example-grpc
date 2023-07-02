@@ -1,0 +1,14 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: influxdb-service
+  annotations:
+    openshift.io/host.generated: 'true'
+spec:
+  to:
+    kind: Service
+    name: influxdb-service
+    weight: 100
+  port:
+    targetPort: 8086
+  wildcardPolicy: None

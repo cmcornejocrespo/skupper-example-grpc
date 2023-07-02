@@ -1,0 +1,8 @@
+- name: Import K6 dashboards
+  kubernetes.core.k8s:
+    template:
+      - dashboards/grafana-com/grafana-dashboard.yaml
+    namespace: '{{ grafana_subscription_namespace }}'
+  loop:
+    - { folder: K6, name: k6-load-testing-results, id: 10660 , datasource: DS_INFLUXDB, datasourcename: k6influxdb }
+    - { folder: K6, name: k6-load-testing-results-by-groups, id: 13719 , datasource: DS_INFLUXDB-K6, datasourcename: k6influxdb }

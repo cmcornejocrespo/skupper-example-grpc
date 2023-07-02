@@ -1,0 +1,5 @@
+- name: Create k6 influxdb grafana datasource
+  kubernetes.core.k8s:
+    template: influxdb/k6-grafana-datasource.yaml
+    namespace: '{{ grafana_instance_namespace }}'
+    wait: true

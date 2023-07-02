@@ -1,0 +1,7 @@
+- name: Deploy Influxdb components
+  kubernetes.core.k8s:
+    template:
+      - influxdb/influxdb-deployment.yaml
+      - influxdb/influxdb-service.yaml
+      - influxdb/influxdb-route.yaml
+    namespace: '{{ grafana_instance_namespace }}'
