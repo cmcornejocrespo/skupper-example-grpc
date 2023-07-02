@@ -23,5 +23,13 @@ NOTE: This test is built having [Scenarios/Executors](https://k6.io/docs/using-k
 
 Alternatively, you can configure k6 to store the test results in influxDB.
 
-Refer to [Working with dashboards](../ansible/)
+Refer to [Grafana+InfluxDB section](../ansible/README.md) to install the Grafana+InfluxDB stack.
+
+Then run the tests:
+
+```bash
+$ k6 run -e FRONT=http://<frontend_route> script.js --out influxdb=http://<influxdb_route>/k6
+```
+
+Access the k6 folder in grafana to retrieve the results.
 
