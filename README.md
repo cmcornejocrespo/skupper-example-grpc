@@ -17,8 +17,8 @@ Top complete this tutorial, do the following:
 
 ## Prerequisites
 
-* The `kubectl` command-line tool, version 1.15 or later ([installation guide](https://kubernetes.io/docs/tasks/tools/install-kubectl/))
-* The `skupper` command-line tool, the latest version ([installation guide](https://skupper.io/start/index.html#step-1-install-the-skupper-command-line-tool-in-your-environment))
+* The `oc` command-line tool ([installation guide](https://docs.openshift.com/container-platform/4.14/cli_reference/openshift_cli/getting-started-cli.html#installing-openshift-cli))
+* The `skupper` command-line tool, the latest version ([installation guide](https://access.redhat.com/documentation/en-us/red_hat_service_interconnect/1.4/html-single/installation/index#installing-skupper-cli))
 
 The basis for this demonstration is to depict the deployment of member microservices for an application across both private and public clusters and for the ability of these microsservices to communicate across a Virtual Application Network. As an example, the cluster deployment might be comprised of:
 
@@ -45,6 +45,7 @@ While the detailed steps are not included here, this demonstration can alternati
    ```bash
    oc config set-context --current --namespace <namespace>
    ```
+   4. (Optional) I use https://kcli.readthedocs.io/en/latest/[kcli] as a way to handle virtual machines to create separate environments locally.
 
 ## Step 2: Deploy the Virtual Application Network
 
@@ -59,14 +60,15 @@ On each cluster, using the `skupper` tool, define the Virtual Application Networ
 2. In the terminal for the east-2 cluster, deploy the **east-2** application router, create a connection token for connections from the **west** cluster:
 
    ```bash
-   skupper init --site-name east-2 --enable-console=false
-   skupper token create east-2-token.yaml
+   skupper init --site-name east-02
+   skupper token create east-02-token.yaml
    ```
 
 3. In the terminal for the west cluster, deploy the **west** application router and define its connections to the **east** and **east-2** clusters.
 
    ```bash
-   skupper init --site-name west --console-auth=openshift
+   # we are only deploying the console in this cluster
+   skupper init --site-name west --enable-console --enable-flow-collector --console-auth=openshift
    skupper link create east-token.yaml
    skupper link create east-2-token.yaml
    ```
